@@ -1,233 +1,270 @@
-# Skribbl Clone — Multiplayer Drawing & Guessing Game
+# 🎨 Skribbl Clone
 
-A full-stack, real-time multiplayer drawing and guessing game (Skribbl.io clone).
+A full-stack, real-time multiplayer drawing and guessing game — inspired by [skribbl.io](https://skribbl.io). Draw, guess, and compete with friends in private rooms using WebSocket-powered gameplay.
+
+> **Live Demo**: [skribbl-clone.onrender.com](https://skribbl-clone.onrender.com) *(free tier — may take ~30s to wake)*
 
 ---
 
-## Tech Stack
+## ✨ Features
+
+### Core Gameplay
+- **Create & Join Rooms** — Generate a 6-character room code and share it with friends
+- **Real-Time Drawing** — HTML5 Canvas with live stroke broadcasting to all players
+- **Guessing & Chat** — Type guesses in chat; correct answers are auto-detected server-side
+- **Round System** — Configurable rounds with turn rotation for each player
+- **Word Selection** — Drawer picks from 3 random words; auto-selects after 15s timeout
+- **Scoring** — Time-based scoring: faster guesses earn more points (up to 500 + 100 first-guesser bonus)
+- **Leaderboard** — Live scoreboard with round-end summaries and final standings
+
+### Drawing Tools
+- 🖊️ **Pen** — Freehand drawing with color picker and adjustable brush size
+- 🧹 **Eraser** — Erase specific strokes
+- ↩️ **Undo** — Remove the last stroke
+- 🗑️ **Clear** — Wipe the entire canvas
+
+### Real-Time Features
+- ⚡ **WebSocket Sync** — All drawing, guessing, and game state updates via Socket.IO
+- 💡 **Progressive Hints** — Letters are revealed over time to help guessers
+- 🔄 **Reconnection Support** — Token-based session recovery on disconnect
+- 👥 **Player Presence** — Live join/leave notifications and connected status tracking
+
+### Room Management
+- 🔒 **Private Rooms** — Rooms are invite-only via room code
+- ⚙️ **Configurable Settings** — Max players (up to 20), rounds, draw time, word count, hints
+- 👑 **Host Controls** — Only the host can start the game and configure settings
+- 🚪 **No Account Needed** — Session-based players; just enter a name and play
+
+---
+
+## 🛠️ Tech Stack
 
 | Layer | Technology |
-|---|---|
-| **Frontend** | React 18, Vite, TypeScript, Tailwind CSS, Zustand, Socket.IO Client |
-| **Backend** | Node.js, Express 5, Socket.IO, TypeScript |
-| **Canvas** | HTML5 Canvas API with custom drawing logic |
-| **Real-time** | Socket.IO (WebSockets) |
-| **State** | In-memory room/game store |
-| **Words** | JSON word list — 200+ words across 5 categories |
+|-------|-----------|
+| **Frontend** | React 18 · TypeScript · Vite · Tailwind CSS · Zustand |
+| **Backend** | Node.js · Express 5 · Socket.IO · TypeScript |
+| **Real-Time** | Socket.IO (WebSocket + fallback transport) |
+| **State** | Zustand (client) · In-memory OOP classes (server) |
+| **Deployment** | Render (Web Service + Blueprint) |
 
 ---
 
-## Getting Started
+## 📁 Project Structure
+
+```
+├── frontend/                  # React SPA
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Canvas.tsx          # HTML5 Canvas drawing with tool controls
+│   │   │   ├── ChatBox.tsx         # Chat + guessing input
+│   │   │   ├── GameView.tsx        # Main game layout (canvas + chat + scoreboard)
+│   │   │   ├── Scoreboard.tsx      # Live player scores
+│   │   │   ├── WordSelector.tsx    # Word choice UI for the drawer
+│   │   │   └── RoundEndOverlay.tsx # Round/game end summary overlay
+│   │   ├── context/
+│   │   │   └── SocketContext.tsx    # Socket.IO provider (singleton connection)
+│   │   ├── pages/
+│   │   │   ├── LandingPage.tsx     # Create/join room flow
+│   │   │   └── RoomPage.tsx        # Lobby + game screen
+│   │   ├── store/
+│   │   │   └── gameStore.ts        # Zustand global state
+│   │   ├── App.tsx                 # Router setup
+│   │   └── main.tsx                # Entry point
+│   └── vite.config.ts
+│
+├── backend/                   # Node.js server
+│   ├── src/
+│   │   ├── classes/
+│   │   │   ├── Game.ts             # Round/turn logic, scoring, hints, timers
+│   │   │   ├── Room.ts             # Room state, settings, player management
+│   │   │   ├── Player.ts           # Player identity and connection state
+│   │   │   └── WordService.ts      # Random word selection from word bank
+│   │   ├── data/
+│   │   │   └── words.json          # Categorized word bank
+│   │   ├── db/
+│   │   │   └── roomStore.ts        # In-memory room storage
+│   │   ├── routes/
+│   │   │   └── rooms.ts            # REST API: create/join/list rooms
+│   │   ├── socket/
+│   │   │   └── index.ts            # Socket.IO event handlers
+│   │   └── index.ts                # Express + Socket.IO bootstrap
+│   └── tsconfig.json
+│
+├── render.yaml                # Render deployment blueprint
+└── package.json               # Root scripts (install, build, start)
+```
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js** 18+ and **npm** 9+
+- **Node.js** ≥ 18
+- **npm** ≥ 9
 
 ### Installation
 
 ```bash
-# Install all dependencies
-cd backend && npm install
-cd ../frontend && npm install
+# Clone the repository
+git clone https://github.com/Uday-Choudhary/Skribbl.git
+cd Skribbl
+
+# Install all dependencies (frontend + backend)
+npm run install:all
 ```
 
-### Running Locally
+### Development
 
 ```bash
-# Terminal 1 — Backend (port 3001)
-cd backend && npm run dev
+# Start backend (port 3001)
+npm run dev:backend
 
-# Terminal 2 — Frontend (port 5173)
-cd frontend && npm run dev
+# In a separate terminal, start frontend (port 5173)
+npm run dev:frontend
 ```
 
-Open [http://localhost:5173](http://localhost:5173)
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### Testing Multiplayer
-1. Open two browser tabs at `http://localhost:5173`
-2. **Tab 1**: Enter name → **Create Room**
-3. **Tab 2**: Enter name → **Join Room** → paste the 6-char code
-4. Click **Start Game** → draw and guess!
-
----
-
-## Deployment (Render)
-
-### One-click deploy
-
-1. Push code to a GitHub/GitLab repo
-2. Go to [Render Dashboard](https://dashboard.render.com) → **New** → **Blueprint**
-3. Connect your repo — Render auto-detects `render.yaml`
-4. Click **Apply** — it builds and deploys
-
-### Manual deploy on Render
-
-1. Create a **Web Service** on Render
-2. Set:
-   - **Build Command**: `cd frontend && npm install && npm run build && cd ../backend && npm install && npm run build`
-   - **Start Command**: `cd backend && npm start`
-   - **Environment**: `NODE_ENV=production`
-3. Deploy
-
-### Other platforms
+### Production Build
 
 ```bash
-# Build for production
-cd frontend && npm run build
-cd ../backend && npm run build
+# Build both frontend and backend
+npm run build
 
-# Start production server (serves frontend + API + WebSockets)
-cd backend && npm start
-```
-
-The production server serves the React SPA + API + WebSockets on a single port.
-
-**Live URL**: *(add your deployed URL here after deploying)*
-
----
-
-## Architecture Overview
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│                        Browser (React)                       │
-│ ┌────────────┐ ┌──────────┐ ┌──────────┐ ┌───────────────┐  │
-│ │ LandingPage│ │  Canvas  │ │ ChatBox  │ │  Scoreboard   │  │
-│ │  (create/  │ │ (HTML5   │ │ (guess/  │ │  (ranked      │  │
-│ │   join)    │ │  Canvas) │ │  chat)   │ │   players)    │  │
-│ └─────┬──────┘ └────┬─────┘ └────┬─────┘ └───────┬───────┘  │
-│       │              │            │               │          │
-│       └──────────────┴────────────┴───────────────┘          │
-│                          │ Socket.IO                         │
-└──────────────────────────┼───────────────────────────────────┘
-                           │
-┌──────────────────────────┼───────────────────────────────────┐
-│                    Node.js Server                            │
-│                          │                                   │
-│  ┌───────────────────────▼────────────────────────────────┐  │
-│  │              Socket Handler (socket/index.ts)          │  │
-│  │  create_room │ join_room │ start_game │ word_chosen    │  │
-│  │  draw_start  │ draw_move │ draw_end   │ guess          │  │
-│  │  draw_undo   │ canvas_clear │ chat    │ play_again     │  │
-│  │  reconnect_player                                     │  │
-│  └───────────────────────┬────────────────────────────────┘  │
-│                          │                                   │
-│  ┌────────┐  ┌───────────▼──┐  ┌───────────┐  ┌──────────┐  │
-│  │ Player │  │     Room     │  │   Game    │  │  Word    │  │
-│  │ Class  │  │    Class     │  │  Class    │  │ Service  │  │
-│  │        │  │ (settings,   │  │ (rounds,  │  │ (200+    │  │
-│  │ (id,   │  │  players,    │  │  scoring, │  │  words,  │  │
-│  │  name, │  │  broadcast)  │  │  hints,   │  │  5 cats, │  │
-│  │  score)│  │              │  │  strokes) │  │  unique) │  │
-│  └────────┘  └──────────────┘  └───────────┘  └──────────┘  │
-│                                                              │
-│  ┌──────────────────┐  ┌──────────────────────────────────┐  │
-│  │ REST Routes      │  │ In-Memory Room Store             │  │
-│  │ POST /rooms      │  │ (CRUD operations)                │  │
-│  │ GET /rooms/:id   │  │                                  │  │
-│  │ GET /rooms/code/ │  │                                  │  │
-│  └──────────────────┘  └──────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────────┘
-```
-
-### How it works
-
-1. **Drawing strokes**: Canvas captures `mousedown/move/up` → emits `draw_start/move/end` via Socket.IO → server relays to all room clients → receivers render on their canvas
-2. **Game state**: Server-authoritative — `Game` class manages rounds, turn order, scoring, timers, hints. All state changes broadcast via socket events
-3. **Word matching**: Server-side, case-insensitive, whitespace-normalized comparison. Word never sent to guessers
-4. **Scoring**: Time-based (max 500, floor 50), first-guesser +100 bonus, drawer earns 10 pts per correct guesser
-
----
-
-## WebSocket Events
-
-| Event | Direction | Purpose |
-|---|---|---|
-| `create_room` | Client → Server | Host creates room |
-| `join_room` | Client → Server | Player joins room |
-| `player_joined` | Server → Clients | Broadcast new player |
-| `player_left` | Server → Clients | Broadcast player left |
-| `start_game` | Client → Server | Host starts game |
-| `game_state` | Server → Clients | Full state snapshot |
-| `round_start` | Server → Clients | New round; drawer gets words |
-| `word_chosen` | Client → Server | Drawer chose word |
-| `round_end` | Server → Clients | Round over |
-| `game_over` | Server → Clients | Game finished |
-| `draw_start/move/end` | Client → Server | Stroke events |
-| `draw_data` | Server → Clients | Broadcast strokes |
-| `canvas_clear` | Client → Server | Clear canvas |
-| `draw_undo` | Client → Server | Undo last stroke |
-| `guess` | Client → Server | Player guess |
-| `guess_result` | Server → Client | Correct/incorrect |
-| `chat` / `chat_message` | Bidirectional | Chat messages |
-| `timer_update` | Server → Clients | Countdown |
-| `word_hint` | Server → Clients | Hint reveal |
-| `play_again` | Client → Server | Host restarts |
-| `reconnect_player` | Client → Server | Token reconnection |
-
----
-
-## Project Structure
-
-```
-├── backend/
-│   ├── src/
-│   │   ├── index.ts            # Express + Socket.IO entry
-│   │   ├── classes/
-│   │   │   ├── Game.ts         # Rounds, scoring, hints, strokes
-│   │   │   ├── Player.ts       # Player state
-│   │   │   ├── Room.ts         # Room settings, players
-│   │   │   └── WordService.ts  # Random word selection
-│   │   ├── data/words.json     # 200+ categorized words
-│   │   ├── db/roomStore.ts     # In-memory CRUD
-│   │   ├── routes/rooms.ts     # REST API
-│   │   └── socket/index.ts     # All WebSocket handlers
-│   ├── tsconfig.json
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── components/         # Canvas, ChatBox, Scoreboard, etc.
-│   │   ├── context/            # SocketContext
-│   │   ├── pages/              # LandingPage, RoomPage
-│   │   └── store/              # Zustand game store
-│   ├── tailwind.config.js
-│   └── package.json
-├── render.yaml                 # Render deployment config
-├── package.json                # Root build scripts
-└── README.md
+# Start the production server (serves frontend from backend)
+npm start
 ```
 
 ---
 
-## Features Checklist
+## 🌐 API Reference
 
-### Must Have ✅
-- [x] Create room with configurable settings
-- [x] Join room via link or code
-- [x] Lobby with player list; host starts game
-- [x] Turn-based rounds: one drawer, others guess
-- [x] Real-time drawing sync (strokes visible to all)
-- [x] Word selection for drawer (1–5 choices)
-- [x] Guessing: type word, get points for correct guess
-- [x] Scoring and leaderboard
-- [x] Game end with winner
-- [x] Basic drawing tools: brush, colors, undo, clear
+### REST Endpoints
 
-### Should Have ✅
-- [x] Hints (reveal letters over time)
-- [x] Chat (guesses + general chat)
-- [x] Draw time countdown
-- [x] Private rooms (invite link)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/rooms` | Create a new room |
+| `GET` | `/rooms` | List all public rooms |
+| `GET` | `/rooms/:id` | Get room details by ID |
+| `GET` | `/rooms/code/:code` | Get room details by join code |
+| `GET` | `/health` | Health check |
 
-### Nice to Have ✅
-- [x] Word categories (animals, objects, actions, food, places)
-- [x] Eraser tool
-- [x] OOP structure (Room, Game, Player, WordService classes)
-- [x] Room settings configurable (draw time, rounds, word count, hints)
-- [x] Play Again (host restarts, retains players)
-- [x] Reconnection (restore session via token)
+### WebSocket Events
+
+#### Client → Server
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `create_room` | `{ playerName }` | Create a new room |
+| `join_room` | `{ roomId, playerName }` | Join an existing room |
+| `reconnect_attempt` | `{ token }` | Reconnect with session token |
+| `start_game` | — | Host starts the game |
+| `word_chosen` | `{ word }` | Drawer selects a word |
+| `draw` | `{ stroke }` | Send a drawing stroke |
+| `draw_undo` | — | Undo last stroke |
+| `draw_clear` | — | Clear the canvas |
+| `guess` | `{ text }` | Submit a guess |
+| `chat` | `{ text }` | Send a chat message |
+| `update_settings` | `{ settings }` | Update room settings (host only) |
+
+#### Server → Client
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `room_created` | `{ roomId, playerId, token }` | Room successfully created |
+| `room_joined` | `{ roomId, playerId, token }` | Joined room successfully |
+| `game_state` | `{ room data }` | Full room state sync |
+| `player_joined` / `player_left` | `{ players[] }` | Player list updated |
+| `round_start` | `{ round, drawerId, drawTime }` | New round begins |
+| `word_chosen` | `{ hint }` | Word selected, hint shown |
+| `draw` | `{ stroke }` | Incoming stroke to render |
+| `timer` | `{ seconds }` | Countdown tick |
+| `hint` | `{ hint }` | Updated hint with revealed letter |
+| `correct_guess` | `{ playerId, scores }` | Someone guessed correctly |
+| `round_end` | `{ word, scores, leaderboard }` | Round summary |
+| `game_over` | `{ winner, leaderboard }` | Final results |
 
 ---
 
-## License
+## 🎮 Game Flow
 
-MIT
+```
+Landing Page → Create/Join Room → Lobby (waiting for players)
+    ↓
+Host clicks "Start Game"
+    ↓
+┌─────────────────────────────────────────────┐
+│  Round Loop (for each round):               │
+│    ↓                                        │
+│  Turn Loop (each player draws once):        │
+│    1. Drawer gets 3 word options (15s)       │
+│    2. Drawing phase begins (configurable)    │
+│    3. Other players guess in chat            │
+│    4. Hints reveal letters over time         │
+│    5. Turn ends when all guess or time runs  │
+│    ↓                                        │
+│  Round End → Show scores                    │
+└─────────────────────────────────────────────┘
+    ↓
+Game Over → Final leaderboard → Return to lobby
+```
+
+---
+
+## ⚙️ Configuration
+
+Default room settings (configurable by host in lobby):
+
+| Setting | Default | Range |
+|---------|---------|-------|
+| Max Players | 8 | 2–20 |
+| Rounds | 3 | 1–10 |
+| Draw Time | 80s | 30–180s |
+| Word Options | 3 | 2–5 |
+| Hints | 2 | 0–5 |
+
+Environment variables (`backend/.env`):
+
+```env
+PORT=3001
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:5173
+MAX_ROOMS=200
+MAX_PLAYERS_PER_ROOM=20
+```
+
+---
+
+## 🌍 Deployment
+
+This project deploys to **Render** as a single web service (backend serves the frontend build).
+
+1. Push to GitHub
+2. Create a new **Web Service** on [Render](https://render.com) from your repo
+3. Render auto-detects `render.yaml` and configures the build
+4. Set environment variables (`NODE_ENV=production`, `PORT=3001`, `CORS_ORIGIN=*`)
+5. Deploy!
+
+See the full [Hosting Plan](./hosting_plan.md) for detailed instructions.
+
+---
+
+## 📊 Scoring System
+
+| Condition | Points |
+|-----------|--------|
+| Correct guess | Up to **500** (decreases over time) |
+| First guesser | +**100** bonus |
+| Minimum guess points | **50** |
+| Drawer bonus | **10** per correct guesser |
+
+---
+
+## 👨‍💻 Author
+
+**Uday Choudhary**  
+GitHub: [@Uday-Choudhary](https://github.com/Uday-Choudhary)
+
+---
+
+## 📄 License
+
+This project is for educational purposes.
