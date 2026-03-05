@@ -2,7 +2,7 @@
 
 A full-stack, real-time multiplayer drawing and guessing game — inspired by [skribbl.io](https://skribbl.io). Draw, guess, and compete with friends in private rooms using WebSocket-powered gameplay.
 
-> **Live Demo**: [skribbl-clone.onrender.com](https://skribbl-clone.onrender.com) *(free tier — may take ~30s to wake)*
+> **Live Demo**: [skribbl-clone.onrender.com](https://skribbl-clone-ol2p.onrender.com/) *(free tier — may take ~30s to wake)*
 
 ---
 
